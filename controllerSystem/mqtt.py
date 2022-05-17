@@ -9,15 +9,17 @@ token = "testing2"
 # mqttBroker = "test.mosquitto.org"
 
 class MQTT_Connection:
-    def __init__(self, telemetry_location):
+    def __init__(self, broker="localhost", port=1883, timeout=60, telemetry_location="v1/devices/me/telemetry", token="token"):
+
         self.client = mqtt.Client()
-        self.location = self.telemetry_location
+        self.telemetry_location = self.telemetry_location
+
         self.client.on_connect = self.on_connect
         self.client.on_connect_fail = self.on_connect_fail
         self.client.on_message = self.get_message
 
         self.client.username_pw_set(token)
-        self.client.connect(mqttBroker, 1883, 60)
+        self.client.connect(broker, port, timeout)
         self.client.loop()
 
     def __del__(self):
@@ -38,7 +40,7 @@ class MQTT_Connection:
         print("connection failed")
 
     def post_message(self, struct) -> None:
-        self.client.publish(self.location, json.dumps(struct), 1)
+        self.client.publish(self.telemetry_location, json.dumps(struct), 1)
 
 
 
