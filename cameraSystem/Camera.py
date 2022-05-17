@@ -1,6 +1,8 @@
 import RPi.GPIO as GPIO
 import asyncio
 
+from ..controllerSystem.mqtt import MQTT_Connection
+
 class Camera():
     def __init__(self):
         # Reference GPIO pins with Broadcom SOC channel numbers
@@ -9,8 +11,8 @@ class Camera():
         # Initilise servo control pins
         GPIO.setup(18, GPIO.OUT)
         GPIO.setup(23,GPIO.OUT)
-        self.panServo = GPIO.PWM(18,50) # pin 18 for pan servo
-        self.tiltServo = GPIO.PWM(23,50) # pin 23 for tilt servo
+        self.panServo = GPIO.PWM(18, 50) # pin 18 for pan servo
+        self.tiltServo = GPIO.PWM(23, 50) # pin 23 for tilt servo
 
         # Start PWM running on both servos, value of 0 (pulse off)
         self.panServo.start(0)
@@ -18,6 +20,9 @@ class Camera():
 
         # Turn to face the user
         self.turn([60, 0])
+
+        # Set up MQTT Connection
+        self.connection = MQTT_Connection(broker="172.20.10.6", token="vzAaa8tPs5w59UxPVBDR")
 
     # Destructor
     def __del__(self):

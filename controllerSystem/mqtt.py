@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 # Free cloud broker, uncomment for use
 # mqttBroker = "test.mosquitto.org"
 
-class MQTT_Connection:
+class MQTT_Connection():
     def __init__(self, broker="localhost", port=1883, timeout=60, telemetry_location="v1/devices/me/telemetry", token="token"):
 
         self.client = mqtt.Client()
