@@ -5,8 +5,8 @@ import paho.mqtt.client as mqtt
 # Free cloud broker, uncomment for use
 # mqttBroker = "test.mosquitto.org"
 
-class MQTT_Connection():
-    def __init__(self, broker="localhost", port=1883, timeout=60, telemetry_location="v1/devices/me/telemetry", token="token"):
+class MQTT_Connection:
+    def __init__(self, broker:str="localhost", port:int=1883, timeout:int=60, telemetry_location:str="v1/devices/me/telemetry", token:str="token") -> None:
 
         self.client = mqtt.Client()
         self.telemetry_location = telemetry_location
@@ -19,21 +19,24 @@ class MQTT_Connection():
         self.client.connect(broker, port, timeout)
         self.client.loop()
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.client.disconnect()
+
+    def subcribe_to(self, subscription: str) -> None:
+        self.client.subscribe(subscription)
         
-    def get_message(self, client, userdata, message):
+    def get_message(self, client, userdata, message) -> str:
         return str(message.payload.decode("utf-8"))
     
     # The callback for when the client receives a CONNACK response from the server.
-    def on_connect(self, client, userdata, flags, rc) :
+    def on_connect(self, client, userdata, flags, rc) -> None:
         if (rc==0) :
             print("connected OK Returned code = ", rc)
             self.post_message(10, 5)
         else :
             print("Bad connection Returned code = ", rc)
     
-    def on_connect_fail(self):
+    def on_connect_fail(self) -> None:
         print("connection failed")
 
     def post_message(self, struct) -> None:
