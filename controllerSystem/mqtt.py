@@ -17,7 +17,7 @@ class MQTT_Connection:
 
         self.client.username_pw_set(token)
         self.client.connect(broker, port, timeout)
-        self.client.loop()
+        self.client.loop_start()
 
     def __del__(self) -> None:
         self.client.disconnect()
