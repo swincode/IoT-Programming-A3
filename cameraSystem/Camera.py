@@ -1,7 +1,9 @@
 import RPi.GPIO as GPIO
 import asyncio
 
-from ..controllerSystem.mqtt import MQTT_Connection
+from mqtt import MQTT_Connection
+
+POSITION_ZERO = [60, 90]
 
 class Camera():
     def __init__(self):
@@ -19,15 +21,20 @@ class Camera():
         self.tiltServo.start(0)
 
         # Turn to face the user
-        self.turn([60, 0])
+        asyncio.run(self.turn(POSITION_ZERO))
+
+        # Keep the Motors Quite
+        self.sleepMotors()
 
         # Set up MQTT Connection
         self.connection = MQTT_Connection(broker="172.20.10.6", token="vzAaa8tPs5w59UxPVBDR")
+        self.connection.subcribe_to("v1/devices/controllerSystem/telemetry")
+        #self.connection.client.loop_forever()
 
     # Destructor
     def __del__(self):
         # Turn to face the user
-        self.turn([60, 0])
+        asyncio.run(self.turn(POSITION_ZERO))
 
         # Stop servos
         self.panServo.stop()
@@ -41,6 +48,7 @@ class Camera():
             # await parseCommand(mqttCommand)
 
     async def waitForCommand(self):
+        self.connection.get_message()
         while True:
             await self.parseCommand(input("Enter command: "))
 
@@ -52,7 +60,7 @@ class Camera():
                     angle = list(map(float, brokenCommand[1:3]))
                 except ValueError:
                     raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
-                self.turn(angle)
+                await self.turn(angle)
             else:
                 raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
         elif brokenCommand[0] == 'w':
@@ -68,15 +76,20 @@ class Camera():
             raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
 
 
-    def turn(self, angle: list[float]):
-        self.panServo.ChangeDutyCycle(2+(angle[0] /18))
+    async def turn(self, angle: list[float]):
+        self.panServo.ChangeDutyCycle(2+(angle[0]/18))
         self.tiltServo.ChangeDutyCycle(2+(angle[1]/18))
 
-    async def wait(self, waitTime: float): 
+        # Allow the servo to move to position before moving to next position
+        await asyncio.sleep(0.2)
+
+    def sleepMotors(self):
         # Stop servos
         self.panServo.ChangeDutyCycle(0)
         self.tiltServo.ChangeDutyCycle(0)
 
+    async def wait(self, waitTime: float): 
+        self.sleepMotors()
         await asyncio.sleep(waitTime)
     
 if __name__ == "__main__":
