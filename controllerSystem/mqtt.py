@@ -32,7 +32,6 @@ class MQTT_Connection:
     def on_connect(self, client, userdata, flags, rc) -> None:
         if (rc==0) :
             print("connected OK Returned code = ", rc)
-            self.post_message(10, 5)
         else :
             print("Bad connection Returned code = ", rc)
     
@@ -41,6 +40,4 @@ class MQTT_Connection:
 
     def post_message(self, struct) -> None:
         self.client.publish(self.telemetry_location, json.dumps(struct), 1)
-
-
 
