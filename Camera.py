@@ -20,6 +20,9 @@ class Camera:
 
     # Destructor
     def __del__(self):
+        # Turn to face the user
+        self.turn([60, 0])
+
         # Stop servos
         self.panServo.stop()
         self.tiltServo.stop()
