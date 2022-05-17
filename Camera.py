@@ -18,10 +18,6 @@ class Camera:
         # Turn to face the user
         self.turn([60, 0])
 
-    def turn(self, angle: list[float]):
-        self.panServo.ChangeDutyCycle(2+(angle[0] /18))
-        self.tiltServo.ChangeDutyCycle(2+(angle[1]/18))
-
     # Destructor
     def __del__(self):
         # Stop servos
@@ -30,3 +26,9 @@ class Camera:
 
         # Free GPIO
         GPIO.cleanup()
+
+    def turn(self, angle: list[float]):
+        self.panServo.ChangeDutyCycle(2+(angle[0] /18))
+        self.tiltServo.ChangeDutyCycle(2+(angle[1]/18))
+
+    
