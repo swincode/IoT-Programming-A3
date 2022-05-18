@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 #import asyncio
 from time import sleep
-from collections import deque
 
 from tb_device_mqtt import TBDeviceMqttClient #, TBPublishInfo
 
@@ -9,17 +8,16 @@ POSITION_ZERO = [60, 90]
 
 class Camera():
     def __init__(self):
-        # Create a Queue where actions gimble actions will be stored before being carried out
-        self.actionQueue = deque()
-        #self.moveStatus = False
+        # Store prvious command
+        self.previousCommand = []
 
         # Set up MQTT Connection
-        self.client = TBDeviceMqttClient("demo.thingsboard.io", "tU9UYbOxY6dJeOxpqh76")
+        self.client = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
         
         # Connect to ThingsBoard
         self.client.connect()
         self.client.send_telemetry({"currentFirmwareVersion": 0.1})
-        self.client.subscribe_to_attribute("command", self.parseCommand)
+        #self.client.subscribe_to_attribute("command", self.parseCommand)
 
         # Reference GPIO pins with Broadcom SOC channel numbers
         GPIO.setmode(GPIO.BCM)
@@ -39,7 +37,7 @@ class Camera():
         # asyncio.run(self.turn(POSITION_ZERO))
 
         # Keep the Motors Quite
-        self.sleepMotors()
+        #self.sleepMotors()
 
     # Destructor
     def __del__(self):
@@ -62,51 +60,60 @@ class Camera():
             # Keep the Python script alive, as MQTT client is threaded, this thread can be busy doing things. We will use it to send camera feed
 
             # If not moving and have actions to complete
-            if self.actionQueue:
-                command = self.actionQueue.popleft()
-                command()
+            #sleep(100)
+            self.client.request_attributes(["command"], callback=self.parseCommand)
+            sleep(0.05)
+            #if self.actionQueue:
+                #command = self.actionQueue.popleft()
+                #command()
                 
 
             # sleep(100)
 
-    def parseCommand(self, client: TBDeviceMqttClient, content: dict[str, str], message: str):
+    def parseCommand(self, client: TBDeviceMqttClient, content: dict[str, dict[str, str]], message: str):
+        #print(client, content, message)
+        
         # Get command from message and split by space
         # If Command is Move, the command will have the format
             # [M, tiltValue, panValue]
         # If Command is Wait, the command will have the format
             # [W, waitTime]
-        command = content.get('command').split(' ')
         
-        if command[0] == 'm':
-            if len(command) == 3:
-                try:
-                    angle = list(map(float, command[1:3]))
-                except ValueError:
-                    raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
-                
-                self.actionQueue.append(lambda: self.turn(angle))
-                #await self.turn(angle)
-            else:
-                raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
-        elif command[0] == 'w':
-            if len(command) == 2:
-                try:
-                    waitTime = float(command[1])
-                except ValueError:
+        # If new command
+        if content.get('client').get("command") != self.previousCommand:
+            self.previousCommand = content.get('client').get("command")
+
+            command = content.get('client').get("command").split(' ')
+            print('Got command')
+            
+            if command[0] == 'm':
+                if len(command) == 3:
+                    try:
+                        angle = list(map(float, command[1:3]))
+                    except ValueError:
+                        raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
+                    
+                    self.turn(angle)
+                    #self.actionQueue.append(lambda: self.turn(angle))
+                    #await self.turn(angle)
+                else:
+                    raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
+            elif command[0] == 'w':
+                if len(command) == 2:
+                    try:
+                        waitTime = float(command[1])
+                    except ValueError:
+                        raise ValueError("Wait time is not a float or int\nw,10.1")
+                    
+                    self.actionQueue.append(lambda: self.wait(waitTime))
+                    #await self.wait(waitTime)
+                else:
                     raise ValueError("Wait time is not a float or int\nw,10.1")
-                
-                self.actionQueue.append(lambda: self.wait(waitTime))
-                #await self.wait(waitTime)
             else:
-                raise ValueError("Wait time is not a float or int\nw,10.1")
-        else:
-            raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
-
-        
-
+                raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
 
     def turn(self, angle: list[float]):
-        # Don't allow new gimble actions to be carried out while we move it
+        # Don't allow new gimbal actions to be carried out while we move it
         #self.moveStatus = True
 
         self.tiltServo.ChangeDutyCycle(2+(angle[0]/18))
@@ -116,11 +123,11 @@ class Camera():
         #success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
 
         # Allow the servo to move to position
-        sleep(0.4)
+        #sleep(0.4)
 
-        # Put the servos to sleep such that the gimble doesn't try to maintain position
-        # If the gimble is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
-        self.sleepMotors()
+        # Put the servos to sleep such that the gimbal doesn't try to maintain position
+        # If the gimbal is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
+        #self.sleepMotors()
         
         #self.moveStatus = False
 
@@ -136,4 +143,4 @@ class Camera():
     
 if __name__ == "__main__":
     camera = Camera()
-    camera.cameraGibleLoop()
+    #camera.cameraGibleLoop()
