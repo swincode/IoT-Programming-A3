@@ -1,17 +1,29 @@
+import time
+from time import sleep
+import serial, random
 
-import serial
+from sqlalchemy import true
 from mqtt import MQTT_Connection
+
+from tb_device_mqtt import TBDeviceMqttClient, TBPublishInfo
 
 ser = serial.Serial("/dev/ttyACM0", 9600)
 
-mqtt = MQTT_Connection()
+client = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
+# client = TBDeviceMqttClient("localhost", "token")
+client.connect()
 
 def main():
     while True:
+        
         data = parse_serial_input()
         data_arr = data.split(",")
         if len(data_arr) == 2:
-            mqtt.post_message(data_arr[0], data_arr[1])
+            mqtt_struct = {
+                "command" : f"m {data_arr[0]} {data_arr[1]}" 
+            }
+            client.send_attributes(mqtt_struct)
+        print(data_arr)
 
 def parse_serial_input() -> str:
         """
