@@ -47,13 +47,7 @@ try:
         temperature = data3
         humidity = round(humidity, 2)
         temperature = round(temperature, 2)
-        
-        pumpPin = {
-            2 : {'name' : 'Pump', 'state' : 0 },
-         }   
-                
-                
-                
+       
         print(u"Ligh Value: {:g}, Moist Value {:g}, Temperature: {:g}\u00b0C, Humidity: {:g}%".format(lighValue, moistValue, temperature, humidity))
         sensor_data['Temperature'] = temperature
         sensor_data['Humidity'] = humidity
