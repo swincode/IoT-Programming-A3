@@ -1,20 +1,13 @@
 import RPi.GPIO as GPIO
-#import asyncio
 from time import sleep
-from collections import deque
 
-from tb_device_mqtt import TBDeviceMqttClient #, TBPublishInfo
+from tb_device_mqtt import TBDeviceMqttClient
 import paho.mqtt.client as mqtt
 
 POSITION_ZERO = [60, 90]
 
 class Camera():
     def __init__(self):
-        # Create a Queue where actions gimble actions will be stored before being carried out
-        self.previousAction = ""
-        #self.actionQueue = deque()
-        #self.moveStatus = False
-
         # Set up MQTT Connection
         self.tbClient = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
         self.moClient = mqtt.Client("gimbal")
@@ -43,7 +36,6 @@ class Camera():
 
         # Turn to face the user
         self.turn(POSITION_ZERO)
-        # asyncio.run(self.turn(POSITION_ZERO))
 
         # Keep the Motors Quite
         self.sleepMotors()
@@ -52,7 +44,6 @@ class Camera():
     def __del__(self):
         # Turn to face the user
         self.turn(POSITION_ZERO)
-        # asyncio.run(self.turn(POSITION_ZERO))
 
         # Stop servos
         self.tiltServo.stop()
@@ -66,11 +57,12 @@ class Camera():
         GPIO.cleanup()
 
     def cameraGibleLoop(self):
+        # As we can't subscribe to MQTT notifications with our version of ThingsBoard, we use mosquitto as a subscribable MQTT broker.
         self.moClient.loop_start()
 
-        # As we can't subscribe to MQTT notifications with our version of ThingsBoard, we poll things board for updates to position. This also keeps the Python script alive
         while True:
-            sleep(1)
+            # This loop keeps the Python script alive 
+            sleep(100)
 
     def parseCommand(self, client, userdata: dict[str, str], message: str):
         # Get command from message and split by space
@@ -90,8 +82,6 @@ class Camera():
                         raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
                     
                     self.turn(angle)
-                    #self.actionQueue.append(lambda: self.turn(angle))
-                    #await self.turn(angle)
                 else:
                     raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
             elif command[0] == 'w':
@@ -102,8 +92,6 @@ class Camera():
                         raise ValueError("Wait time is not a float or int\nw,10.1")
                     
                     self.wait(waitTime)
-                    #self.actionQueue.append(lambda: self.wait(waitTime))
-                    #await self.wait(waitTime)
                 else:
                     raise ValueError("Wait time is not a float or int\nw,10.1")
             else:
@@ -113,14 +101,10 @@ class Camera():
             sleep(1) 
 
     def turn(self, angle: list[float]):
-        # Don't allow new gimble actions to be carried out while we move it
-        #self.moveStatus = True
-
         self.tiltServo.ChangeDutyCycle(2+(angle[0]/18))
         self.panServo.ChangeDutyCycle(2+(angle[1]/18))
 
         result = self.tbClient.send_telemetry({"pan": angle[0], "tilt": angle[1]})
-        #success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
 
         # Allow the servo to move to position
         sleep(0.4)
@@ -128,8 +112,6 @@ class Camera():
         # Put the servos to sleep such that the gimble doesn't try to maintain position
         # If the gimble is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
         self.sleepMotors()
-        
-        #self.moveStatus = False
 
     def sleepMotors(self):
         # Stop servos
@@ -139,7 +121,6 @@ class Camera():
     def wait(self, waitTime: float): 
         self.sleepMotors()
         sleep(waitTime)
-        #await asyncio.sleep(waitTime)
     
 if __name__ == "__main__":
     camera = Camera()
