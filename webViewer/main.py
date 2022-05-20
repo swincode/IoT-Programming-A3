@@ -1,5 +1,6 @@
 
 import asyncio
+import json
 from tb_device_mqtt import TBDeviceMqttClient
 
 from fastapi import FastAPI, WebSocket, Request
@@ -15,6 +16,7 @@ client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
 
 # client = TBDeviceMqttClient("demo.thingsboard.io", "bLvC1TSknBYefPXQFOSX")
 client.connect()
+something = ""
 
 @app.on_event("startup")
 async def startup():
@@ -25,24 +27,50 @@ async def root(request: Request):
     # camera_active = client.request_attributes(["camera_active"])
     return templates.TemplateResponse("home.html", {"request": request})
 
-@app.websocket_route("/ws/data")
+@app.websocket_route("/ws/controller")
 async def websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
         await asyncio.sleep(0.5)
         # Get mqtt to receive data
+
         def anon_inner(client, result, exception):
-            print(result)
-            
-        client.request_attributes(["command"], callback=anon_inner)
+            data = result.get("client").get("command").split(" ")
+            something = {
+                        "x" : data[1],
+                        "y" : data[2]
+                    }
+            return something
+        data = client.request_attributes(["command"], callback=anon_inner)
         # return await websocket.send(data_return)
+        # await websocket.send_text(data)
+        print(data)
+
+@app.get("/controller-data")
+def controller_data():
+    def get_data(client, result, error):
+        data = result.get("client").get("command").split(" ")
+        return data
+    client.request_attributes(["command"], callback=get_data)
+
+            
 
 @app.websocket_route("/ws/control")
 async def control_websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
         txt = await websocket.receive_text()
-        print(txt)
+        client.request_attributes(["command"], callback=send_update)
+        def send_update(client, result, exception):
+            print("callback")
+            # match txt:
+            #     case "toggle":
+            #         client.send_attributes({"controller state" : not (result.get("client").get("controller state"))})
+            #     case "up":
+            #         client.send_attributes
+            #     case "down":
+            #     case "left":
+            #     case "right":
 
 @app.websocket_route("/ws/camera")
 async def graph_websocket(websocket: WebSocket):
