@@ -1,17 +1,14 @@
-import time
-from time import sleep
-import serial, random
+import serial
 
-from sqlalchemy import true
-from mqtt import MQTT_Connection
-
+import paho.mqtt.client as mqtt
 from tb_device_mqtt import TBDeviceMqttClient, TBPublishInfo
 
 ser = serial.Serial("/dev/ttyACM0", 9600)
 
-client = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
-# client = TBDeviceMqttClient("localhost", "token")
-client.connect()
+tbClient = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
+moClient = mqtt.Client("joystick")
+tbClient.connect()
+moClient.connect("test.mosquitto.org")
 
 def main():
     while True:
@@ -19,10 +16,12 @@ def main():
         data = parse_serial_input()
         data_arr = data.split(",")
         if len(data_arr) == 2:
+            mqtt_string = f"m {data_arr[0]} {data_arr[1]}"
+            moClient.publish("joystick/command", mqtt_string)
             mqtt_struct = {
-                "command" : f"m {data_arr[0]} {data_arr[1]}" 
+                "command" : mqtt_string 
             }
-            client.send_attributes(mqtt_struct)
+            tbClient.send_attributes(mqtt_struct)
         print(data_arr)
 
 def parse_serial_input() -> str:
