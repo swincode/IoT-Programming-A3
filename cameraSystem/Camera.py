@@ -21,7 +21,7 @@ class Camera():
         
         # Connect to MQTT
         self.tbClient.connect()
-        self.moClient.connect("test.mosquitto.org", 8883)
+        self.moClient.connect("test.mosquitto.org")
         self.tbClient.send_telemetry({"currentFirmwareVersion": 0.1})
         self.moClient.subscribe("joystick/command")
         self.moClient.on_message = self.parseCommand
@@ -78,11 +78,9 @@ class Camera():
             # [M, tiltValue, panValue]
         # If Command is Wait, the command will have the format
             # [W, waitTime]
-
-        print(userdata)
             
         try:
-            command = userdata.get('command').split(' ')
+            command = message.payload.decode("utf-8").split(' ')
             
             if command[0] == 'm':
                 if len(command) == 3:
