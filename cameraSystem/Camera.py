@@ -4,6 +4,7 @@ from time import sleep
 from collections import deque
 
 from tb_device_mqtt import TBDeviceMqttClient #, TBPublishInfo
+import paho.mqtt.client as mqtt
 
 POSITION_ZERO = [60, 90]
 
@@ -15,12 +16,17 @@ class Camera():
         #self.moveStatus = False
 
         # Set up MQTT Connection
-        self.client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
+        self.tbClient = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
+        self.moClient = mqtt.Client("gimbal")
         
-        # Connect to ThingsBoard
-        self.client.connect()
-        self.client.send_telemetry({"currentFirmwareVersion": 0.1})
-        self.client.subscribe_to_attribute("command", self.parseCommand)
+        # Connect to MQTT
+        self.tbClient.connect()
+        self.moClient.connect("test.mosquitto.org", 8883)
+        self.tbClient.send_telemetry({"currentFirmwareVersion": 0.1})
+        self.moClient.subscribe("joystick/command")
+        self.moClient.on_message = self.parseCommand
+
+        print("mqtt setup")
 
         # Reference GPIO pins with Broadcom SOC channel numbers
         GPIO.setmode(GPIO.BCM)
@@ -53,27 +59,30 @@ class Camera():
         self.panServo.stop()
 
         # Disconnect from MQTT
-        self.client.disconnect()
+        self.tbClient.disconnect()
+        self.moClient.loop_stop()
 
         # Free GPIO
         GPIO.cleanup()
 
     def cameraGibleLoop(self):
+        self.moClient.loop_start()
+
         # As we can't subscribe to MQTT notifications with our version of ThingsBoard, we poll things board for updates to position. This also keeps the Python script alive
         while True:
-            sleep(100)
+            sleep(1)
 
-    def parseCommand(self, client: TBDeviceMqttClient, content: dict[str, str], message: str):
+    def parseCommand(self, client, userdata: dict[str, str], message: str):
         # Get command from message and split by space
         # If Command is Move, the command will have the format
             # [M, tiltValue, panValue]
         # If Command is Wait, the command will have the format
             # [W, waitTime]
 
-        print(content)
+        print(userdata)
             
         try:
-            command = content.get('client').get('command').split(' ')
+            command = userdata.get('command').split(' ')
             
             if command[0] == 'm':
                 if len(command) == 3:
@@ -102,6 +111,7 @@ class Camera():
             else:
                 raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
         except AttributeError:
+            print("Dropped a message")
             sleep(1) 
 
     def turn(self, angle: list[float]):
@@ -111,7 +121,7 @@ class Camera():
         self.tiltServo.ChangeDutyCycle(2+(angle[0]/18))
         self.panServo.ChangeDutyCycle(2+(angle[1]/18))
 
-        result = self.client.send_telemetry({"pan": angle[0], "tilt": angle[1]})
+        result = self.tbClient.send_telemetry({"pan": angle[0], "tilt": angle[1]})
         #success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
 
         # Allow the servo to move to position
