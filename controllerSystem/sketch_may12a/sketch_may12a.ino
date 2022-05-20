@@ -60,6 +60,7 @@ int map_axis(int axis) {
 
 void activation_ISR() {
   if ((millis() - last_debounce_time) > DEBOUNCE_DELAY) {
+    Serial.println("toggle power");
     activation_state = !activation_state;
     last_debounce_time = millis();
     digitalWrite(LED_PIN, activation_state);

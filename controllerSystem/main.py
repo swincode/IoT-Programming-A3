@@ -1,3 +1,4 @@
+
 import serial
 
 import paho.mqtt.client as mqtt
@@ -10,9 +11,25 @@ moClient = mqtt.Client("joystick")
 tbClient.connect()
 moClient.connect("test.mosquitto.org")
 
+
+import serial
+
+from tb_device_mqtt import TBDeviceMqttClient, TBPublishInfo
+
+ser = serial.Serial("/dev/ttyACM0", 9600)
+
+client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
+# client = TBDeviceMqttClient("localhost", "token")
+client.connect()
+
+
 def main():
+    state = True
     while True:
         data = parse_serial_input()
+        if data == "toggle power":
+            state = not state
+            client.send_attributes({"power state": state})
         data_arr = data.split(",")
         if len(data_arr) == 2:
             data_arr[0] = int(data_arr[0]) - 30
@@ -24,6 +41,7 @@ def main():
                 "command" : mqtt_string 
             }
             tbClient.send_attributes(mqtt_struct)
+
         print(data_arr)
 
 def parse_serial_input() -> str:
