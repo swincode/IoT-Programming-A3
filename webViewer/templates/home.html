@@ -43,24 +43,7 @@
     </div>
     <script>
         var ws = new WebSocket("ws://localhost:8000/ws/control");
-        ws.onmessage = function(event) {
-            x_pos = document.getElementById("x-pos")
-            y_pos = document.getElementById("y-pos")
-            console.log(event);
-        };
         function sendControlCommand(event, msg) {
-            ws.send(msg)
-            event.preventDefault()
-        }
-    </script>
-    <script>
-        var ws = new WebSocket("ws://localhost:8000/ws/data");
-        ws.onmessage = function(event) {
-            x_pos = document.getElementById("x-pos")
-            y_pos = document.getElementById("y-pos")
-            console.log(event);
-        };
-        function sendMessage(event, msg) {
             ws.send(msg)
             event.preventDefault()
         }

@@ -1,4 +1,5 @@
 
+import asyncio
 from tb_device_mqtt import TBDeviceMqttClient
 
 from fastapi import FastAPI, WebSocket, Request
@@ -28,6 +29,7 @@ async def root(request: Request):
 async def websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
+        await asyncio.sleep(0.5)
         # Get mqtt to receive data
         def anon_inner(client, result, exception):
             print(result)
