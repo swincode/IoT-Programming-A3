@@ -1,16 +1,17 @@
 # Script to quickly send move requests to gimble to test queuing of actions
 
-from tb_device_mqtt import TBDeviceMqttClient
+import paho.mqtt.client as mqtt
 from random import randint
 from time import sleep
 
 if __name__ == "__main__":
     # Set up MQTT Connection
-    client = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
-
-    # Connect to ThingsBoard
-    client.connect()
+    client = mqtt.Client("joystick")
+    
+    # Connect
+    client.connect("test.mosquitto.org")
 
     while True:
-        client.send_attributes({"command" : f"m {randint(0, 180)} {randint(0, 180)}"})
+        client.publish("joystick/command", f"m {randint(0, 180)} {randint(0, 180)}")
+        print("published")
         sleep(0.1)
