@@ -15,10 +15,10 @@ def main():
         data = parse_serial_input()
         data_arr = data.split(",")
         if len(data_arr) == 2:
-            data_arr[0] -= 30
+            data_arr[0] = int(data_arr[0]) - 30
             if data_arr[0] < 0:
                 data_arr[0] = 0
-            mqtt_string = f"m {data_arr} {data_arr[1]}"
+            mqtt_string = f"m {data_arr[0]} {data_arr[1]}"
             moClient.publish("joystick/command", mqtt_string)
             mqtt_struct = {
                 "command" : mqtt_string 
