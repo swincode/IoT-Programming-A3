@@ -73,7 +73,7 @@
                 </div>
         </div>
     </div>
-    
+
     </div>
     <script>
         var ws = new WebSocket("ws://localhost:8000/ws/control");
@@ -84,19 +84,20 @@
     </script>
     <script>
         var ws = new WebSocket("ws://localhost:8000/ws/controller");
-        ws.onmessage = function(event) {
+        ws.onmessage = function (event) {
             console.log(event);
         }
     </script>
     <script>
-        function httpGet(theUrl) {
-            let xmlHttpReq = new XMLHttpRequest();
-            xmlHttpReq.open("GET", theUrl, false);
-            return xmlHttpReq.responseText;
-        };
-        function sleep(milliseconds) {  
-            return new Promise(resolve => setTimeout(resolve, milliseconds));  
-        };
+        let url = "http://localhost/controller-data"
+        fetch(url,{credentials: 'same-origin'}).then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            console.log(data);
+        }).catch(function (err) {
+            console.log(err);
+        });
     </script>
 </body>
+
 </html>

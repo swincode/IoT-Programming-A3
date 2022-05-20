@@ -4,10 +4,24 @@ import json
 from tb_device_mqtt import TBDeviceMqttClient
 
 from fastapi import FastAPI, WebSocket, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -33,24 +47,23 @@ async def websocket(websocket: WebSocket):
     while True:
         await asyncio.sleep(0.5)
         # Get mqtt to receive data
-
-        def anon_inner(client, result, exception):
-            data = result.get("client").get("command").split(" ")
-            something = {
-                        "x" : data[1],
-                        "y" : data[2]
-                    }
-            return something
-        data = client.request_attributes(["command"], callback=anon_inner)
+        something = controller_data()
+        await websocket.send_json(json.dumps(something))
+        
         # return await websocket.send(data_return)
         # await websocket.send_text(data)
 
-@app.get("/controller-data")
 def controller_data():
     def get_data(client, result, error):
         print("there")
-        data = result.get("client").get("command").split(" ")
-        return PlainTextResponse(data)
+        if result != None:
+            data = result.get("client").get("command").split(" ")
+            json_resp = {
+                "command" : data[0],
+                "x" : data[1],
+                "y" : data[2]
+            }
+            return json_resp
     client.request_attributes(["command"], callback=get_data)
     time.sleep(3)
 
