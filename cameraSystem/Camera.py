@@ -61,8 +61,7 @@ class Camera():
     def cameraGibleLoop(self):
         # As we can't subscribe to MQTT notifications with our version of ThingsBoard, we poll things board for updates to position. This also keeps the Python script alive
         while True:
-            self.client.request_attributes(["command"], callback=self.parseCommand)
-            sleep(1)
+            sleep(100)
 
     def parseCommand(self, client: TBDeviceMqttClient, content: dict[str, str], message: str):
         # Get command from message and split by space
@@ -72,47 +71,38 @@ class Camera():
             # [W, waitTime]
 
         print(content)
-
-        # If action is not the same as the last action, move the gimbal accordingly
-        if self.previousAction != content:
-            self.previousAction = content
             
-            try:
-                command = content.get('client').get('command').split(' ')
-                
-                if command[0] == 'm':
-                    if len(command) == 3:
-                        try:
-                            angle = list(map(float, command[1:3]))
-                        except ValueError:
-                            raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
-                        
-                        self.turn(angle)
-                        #self.actionQueue.append(lambda: self.turn(angle))
-                        #await self.turn(angle)
-                    else:
-                        raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
-                elif command[0] == 'w':
-                    if len(command) == 2:
-                        try:
-                            waitTime = float(command[1])
-                        except ValueError:
-                            raise ValueError("Wait time is not a float or int\nw,10.1")
-                        
-                        self.wait(waitTime)
-                        #self.actionQueue.append(lambda: self.wait(waitTime))
-                        #await self.wait(waitTime)
-                    else:
-                        raise ValueError("Wait time is not a float or int\nw,10.1")
+        try:
+            command = content.get('client').get('command').split(' ')
+            
+            if command[0] == 'm':
+                if len(command) == 3:
+                    try:
+                        angle = list(map(float, command[1:3]))
+                    except ValueError:
+                        raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
+                    
+                    self.turn(angle)
+                    #self.actionQueue.append(lambda: self.turn(angle))
+                    #await self.turn(angle)
                 else:
-                    raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
-            except AttributeError:
-                sleep(1) 
-        else:
-            sleep(1)
-
-        
-
+                    raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
+            elif command[0] == 'w':
+                if len(command) == 2:
+                    try:
+                        waitTime = float(command[1])
+                    except ValueError:
+                        raise ValueError("Wait time is not a float or int\nw,10.1")
+                    
+                    self.wait(waitTime)
+                    #self.actionQueue.append(lambda: self.wait(waitTime))
+                    #await self.wait(waitTime)
+                else:
+                    raise ValueError("Wait time is not a float or int\nw,10.1")
+            else:
+                raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
+        except AttributeError:
+            sleep(1) 
 
     def turn(self, angle: list[float]):
         # Don't allow new gimble actions to be carried out while we move it
