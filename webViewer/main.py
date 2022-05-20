@@ -1,10 +1,10 @@
 
-import asyncio
+import asyncio, time
 import json
 from tb_device_mqtt import TBDeviceMqttClient
 
 from fastapi import FastAPI, WebSocket, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
@@ -44,14 +44,15 @@ async def websocket(websocket: WebSocket):
         data = client.request_attributes(["command"], callback=anon_inner)
         # return await websocket.send(data_return)
         # await websocket.send_text(data)
-        print(data)
 
 @app.get("/controller-data")
 def controller_data():
     def get_data(client, result, error):
+        print("there")
         data = result.get("client").get("command").split(" ")
-        return data
+        return PlainTextResponse(data)
     client.request_attributes(["command"], callback=get_data)
+    time.sleep(3)
 
             
 

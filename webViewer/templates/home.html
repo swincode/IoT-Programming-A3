@@ -88,6 +88,15 @@
             console.log(event);
         }
     </script>
+    <script>
+        function httpGet(theUrl) {
+            let xmlHttpReq = new XMLHttpRequest();
+            xmlHttpReq.open("GET", theUrl, false);
+            return xmlHttpReq.responseText;
+        };
+        function sleep(milliseconds) {  
+            return new Promise(resolve => setTimeout(resolve, milliseconds));  
+        };
+    </script>
 </body>
-
 </html>
