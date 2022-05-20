@@ -1,7 +1,4 @@
 
-import json
-from time import sleep
-
 from tb_device_mqtt import TBDeviceMqttClient
 
 from fastapi import FastAPI, WebSocket, Request
@@ -12,7 +9,9 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-client = TBDeviceMqttClient("localhost", "token")
+# client = TBDeviceMqttClient("localhost", "bLvC1TSknBYefPXQFOSX")
+client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
+
 # client = TBDeviceMqttClient("demo.thingsboard.io", "bLvC1TSknBYefPXQFOSX")
 client.connect()
 
@@ -22,6 +21,7 @@ async def startup():
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
+    # camera_active = client.request_attributes(["camera_active"])
     return templates.TemplateResponse("home.html", {"request": request})
 
 @app.websocket_route("/ws/data")
@@ -29,8 +29,18 @@ async def websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
         # Get mqtt to receive data
-        positions = client.request_attributes(["x", "y"], callback=on_attributes_change)
-        return await websocket.send(positions)
+        def anon_inner(client, result, exception):
+            print(result)
+            
+        client.request_attributes(["command"], callback=anon_inner)
+        # return await websocket.send(data_return)
+
+@app.websocket_route("/ws/control")
+async def control_websocket(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        txt = await websocket.receive_text()
+        print(txt)
 
 @app.websocket_route("/ws/camera")
 async def graph_websocket(websocket: WebSocket):
@@ -40,7 +50,10 @@ async def graph_websocket(websocket: WebSocket):
 
 def on_attributes_change(object, result, exception):
     if exception is not None:
-        print("Exception:", str(exception))
+        pass
+        # print("Exception:", str(exception))
     else:
-        return result
-    
+        try:
+            data_return = result
+        except Exception as e:
+            print(e)    
