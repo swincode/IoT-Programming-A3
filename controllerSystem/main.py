@@ -10,9 +10,13 @@ client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
 client.connect()
 
 def main():
+    state = True
     while True:
         
         data = parse_serial_input()
+        if data == "toggle power":
+            state = not state
+            client.send_attributes({"power state": state})
         data_arr = data.split(",")
         if len(data_arr) == 2:
             mqtt_struct = {
@@ -23,6 +27,7 @@ def main():
             }
             client.send_attributes(mqtt_struct)
             client.send_telemetry(telemetry)
+        
         print(data_arr)
 
 def parse_serial_input() -> str:
