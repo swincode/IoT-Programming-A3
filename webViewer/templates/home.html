@@ -16,17 +16,11 @@
         <div class="camera">
             <img src="http://172.20.10.4:8081">
             <div class="controls">
-                <form action="" onsubmit="sendControlCommand(event, 'up')">
-                    <button class="btn btn-primary">Up</button>
-                </form>
-                <form action="" onsubmit="sendControlCommand(event, 'down')">
-                    <button class="btn btn-primary">Down</button>
-                </form>
-                <form action="" onsubmit="sendControlCommand(event, 'left')">
-                    <button class="btn btn-primary">Left</button>
-                </form>
-                <form action="" onsubmit="sendControlCommand(event, 'right')">
-                    <button class="btn btn-primary">Right</button>
+                <form action="" onsubmit="sendControlCommand(event, value)">
+                    <button class="btn btn-primary" value="up">Up</button>
+                    <button class="btn btn-primary" value="down">Down</button>
+                    <button class="btn btn-primary" value="left">Left</button>
+                    <button class="btn btn-primary" value="right">Right</button>
                 </form>
     
             </div>
