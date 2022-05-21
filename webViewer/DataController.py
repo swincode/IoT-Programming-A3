@@ -30,15 +30,3 @@ class DataController:
     def toggle_joystick_state(self):
         self.joystick_state = not self.joystick_state
 
-try:
-    if flag:
-        cli = mqtt.Client("joystick")
-        cli.connect("test.mosquitto.org")
-        data_controller = DataController()
-        data_controller.moClient.loop_start()
-        while True:
-            sleep(1)
-            print("sending")
-            cli.publish("joystick/command", f"m {random.randint(0, 180)} {random.randint(0, 180)}")
-except KeyboardInterrupt:
-    pass

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from DataController import DataController
 
-app = FastAPI()
+app = FastAPI(host="0.0.0.0")
 
 origins = [
     "http://localhost",
