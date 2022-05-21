@@ -19,8 +19,6 @@ class Camera():
         self.moClient.subscribe("joystick/command")
         self.moClient.on_message = self.parseCommand
 
-        print("mqtt setup")
-
         # Reference GPIO pins with Broadcom SOC channel numbers
         GPIO.setmode(GPIO.BCM)
 
@@ -36,9 +34,6 @@ class Camera():
 
         # Turn to face the user
         self.turn(POSITION_ZERO)
-
-        # Keep the Motors Quite
-        self.sleepMotors()
 
     # Destructor
     def __del__(self):
@@ -56,7 +51,7 @@ class Camera():
         # Free GPIO
         GPIO.cleanup()
 
-    def cameraGibleLoop(self):
+    def cameraGimbleLoop(self):
         # As we can't subscribe to MQTT notifications with our version of ThingsBoard, we use mosquitto as a subscribable MQTT broker.
         self.moClient.loop_start()
 
@@ -79,23 +74,23 @@ class Camera():
                     try:
                         angle = list(map(float, command[1:3]))
                     except ValueError:
-                        raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
+                        raise ValueError("Angle to move is not two floats or ints seperated by a comma")
                     
                     self.turn(angle)
                 else:
-                    raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
+                    raise ValueError("Angle to move is not two floats or ints seperated by a comma")
             elif command[0] == 'w':
                 if len(command) == 2:
                     try:
                         waitTime = float(command[1])
                     except ValueError:
-                        raise ValueError("Wait time is not a float or int\nw,10.1")
+                        raise ValueError("Wait time is not a float or int")
                     
                     self.wait(waitTime)
                 else:
-                    raise ValueError("Wait time is not a float or int\nw,10.1")
+                    raise ValueError("Wait time is not a float or int")
             else:
-                raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
+                raise ValueError("Unknown command: Please use either m; move, or w; wait.")
         except AttributeError:
             print("Dropped a message")
             sleep(1) 
@@ -105,9 +100,6 @@ class Camera():
         self.panServo.ChangeDutyCycle(2+(angle[1]/18))
 
         result = self.tbClient.send_telemetry({"pan": angle[0], "tilt": angle[1]})
-
-        # Allow the servo to move to position
-        sleep(0.4)
 
         # Put the servos to sleep such that the gimble doesn't try to maintain position
         # If the gimble is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
@@ -124,4 +116,4 @@ class Camera():
     
 if __name__ == "__main__":
     camera = Camera()
-    camera.cameraGibleLoop()
+    camera.cameraGimbleLoop()
