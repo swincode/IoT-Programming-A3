@@ -14,4 +14,4 @@ if __name__ == "__main__":
     while True:
         client.publish("joystick/command", f"m {randint(0, 180)} {randint(0, 180)}")
         print("published")
-        sleep(0.1)
+        sleep(1)

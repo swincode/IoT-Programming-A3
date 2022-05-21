@@ -28,13 +28,11 @@ app.add_middleware(
 
 templates = Jinja2Templates(directory="templates")
 
-# client = TBDeviceMqttClient("localhost", "bLvC1TSknBYefPXQFOSX")
+#client = TBDeviceMqttClient("localhost", "bLvC1TSknBYefPXQFOSX")
 client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
-# moClient = mqtt.Client("joystick")
 
 # client = TBDeviceMqttClient("demo.thingsboard.io", "bLvC1TSknBYefPXQFOSX")
 client.connect()
-# moClient.connect("test.mosquitto.org")
 # something = ""
 
 data_controller = DataController("website")
