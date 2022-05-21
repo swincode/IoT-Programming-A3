@@ -21,7 +21,7 @@ class ControllerSystem:
                 if data == "toggle power":
                     self.powerState = not self.powerState
                     self.data_controller.send_attributes({"power state": self.powerState})
-                    self.data_controller.send_data("joystick/power", str(self.powerState))
+                    self.data_controller.send_data("joystick/power", f"irrigation {self.powerState}")
                 data_arr = data.split(",")
                 if len(data_arr) == 2:
                     mqtt_string = f"m {data_arr[0]} {data_arr[1]}"
@@ -32,6 +32,8 @@ class ControllerSystem:
                     self.data_controller.send_attributes(mqtt_struct)
 
                 print(data_arr)
+            else:
+                print("off")
 
     def parse_serial_input(self) -> str:
             """

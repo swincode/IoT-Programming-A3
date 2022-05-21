@@ -10,7 +10,7 @@ class DataController:
         self.y_pos = 0
         self.joystick_state = True
         self.irrigation_state = False
-        self.send_data("joystick/state", self.joystick_state)
+        self.send_data("joystick/state", f"joystick {self.joystick_state}")
 
     
     def __del__(self):
@@ -19,6 +19,7 @@ class DataController:
 
     def get_msg(self, client, userdata, message: str) -> None:
         data = message.payload.decode("utf-8").split(" ")
+        print(data)
         if len(data) == 3:
             self.x_pos = data[1]
             self.y_pos = data[2]

@@ -15,7 +15,7 @@ class DataController:
         self.moClient.on_message = self.get_msg
 
         self.joystick_state = True
-        self.send_data("joystick/state", self.joystick_state)
+        #self.send_data("joystick/state", f"joystick {self.joystick_state}")
 
     
     def __del__(self):
@@ -30,7 +30,6 @@ class DataController:
             self.joystick_state = True
         else:
             self.joystick_state = False
-        print(self.joystick_state)
 
     def get_data(self) -> None:
         return str(self.joystick_state)
