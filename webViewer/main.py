@@ -35,7 +35,7 @@ client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
 client.connect()
 # something = ""
 
-data_controller = DataController("website")
+data_controller = DataController("joystick")
 
 @app.on_event("startup")
 async def startup():
@@ -47,13 +47,14 @@ async def root(request: Request):
     # camera_active = client.request_attributes(["camera_active"])
     return templates.TemplateResponse("home.html", {"request": request})
 
-@app.websocket_route("/ws/controller")
+@app.websocket_route("/ws/data")
 async def websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
         await asyncio.sleep(0.5)
         # Get mqtt to receive data
         data = data_controller.get_data()
+        # print(data)
         try:
             await websocket.send_json(json.dumps(data))
         except Exception as e:
@@ -62,12 +63,12 @@ async def websocket(websocket: WebSocket):
         # return await websocket.send(data_return)
         # await websocket.send_text(data)            
 
-@app.websocket_route("/ws")
+@app.websocket_route("/ws/position")
 async def control_websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
+        print("here")
         txt = await websocket.receive_text()
-        print(txt)
         # result = data_controller.get_data()
         # match txt:
         #     case "toggle":

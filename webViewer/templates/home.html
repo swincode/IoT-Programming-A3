@@ -13,12 +13,32 @@
         <title>IoT Programming A3</title>
     </head>
 
-    <body style="padding: 10%;">
-        <center>
-            <h1 style="font-family: Comic Sans;">IoT Programming Assignment 3 Dashboard</h1>
-        </center>
-        <div style="padding: 20%; padding-top: 5%">
-            <div class="camera">
+<body style="padding: 10%;">
+    <center>
+        <h1 style="font-family: Comic Sans;">IoT Programming Assignment 3 dashboard</h1>
+    </center>
+    <div style="padding: 20%; padding-top: 5%">
+        <div class="camera">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-8">
+
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="data">
+                            <ul>
+                                <li id="control">Controller: </li>
+                                <li id="x-pos">X pos: </li>
+                                <li id="y-pos">Y pos: </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="controls">
+            <center>
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-8">
@@ -74,13 +94,24 @@
             </div>
         </div>
 
-        <script>
-            var ws = new WebSocket("ws://localhost:8000/ws");
-            function sendControlCommand(event, msg) {
-                console.log(msg);
-                ns.send(msg)
-                event.preventDefault()
-            }
+    </div>
+    <script>
+        var button_ws = new WebSocket("ws://localhost:8000/ws/position");
+        function sendControlCommand(event, msg) {
+            button_ws.send(msg);
+            event.preventDefault();
+        }
+    </script>
+    <script>
+        var ws = new WebSocket("ws://localhost:8000/ws/data");
+        ws.onmessage = function (event) {
+            data = JSON.parse(event.data);
+            data = JSON.parse(data);
+            document.getElementById("x-pos").innerText = "X pos = " + data.x;
+            document.getElementById("y-pos").innerText = "Y pos = " + data.y;
+        }
+    </script>
+</body>
 
             var ws = new WebSocket("ws://localhost:8000/ws/controller");
             ws.onmessage = function (event) {

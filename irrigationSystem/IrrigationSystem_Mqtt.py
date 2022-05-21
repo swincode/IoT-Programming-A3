@@ -2,6 +2,7 @@ import os
 import time
 import sys
 import paho.mqtt.client as mqtt
+from tb_device_mqtt import TBDeviceMqttClient
 import json
 import serial
 device='/dev/ttyS0'
@@ -13,10 +14,15 @@ arduino= serial.Serial(device,9600)
 THINGSBOARD_HOST = 'demo.thingsboard.io'
 ACCESS_TOKEN = 'Irrigation_System_Token'
 
+
 # Data capture and upload interval in seconds. Less interval will eventually hang the DHT22.
 INTERVAL=2
 
 sensor_data = {'temperature': 0, 'humidity': 0}
+pins = {
+    3 : {'name' : 'Pump', 'state' : 0 },
+    2 : {'name' : 'LED', 'state' : 0 }
+    }
 
 next_reading = time.time() 
 
@@ -29,6 +35,23 @@ client.username_pw_set(ACCESS_TOKEN)
 client.connect(THINGSBOARD_HOST, 1883, 60)
 
 client.loop_start()
+
+        
+def toggle_function(changePin, toggle):
+        changePin = int(changePin)
+        deviceName = pins[changePin]['name']
+        if toggle == "on": 
+         if changePin == 3:
+            ser.write(b"3")
+            pins[changePin]['state'] = 1
+            message = "Turned" + deviceName + "on."
+              
+        if toggle == "off":
+          if changePin == 3:
+            ser.write(b"4")
+            pins[changePin]['state'] = 0
+            #Set the pin low
+            message = "Turned" + deviceName + "off."    
 
 try:
     while True:
@@ -47,7 +70,9 @@ try:
         temperature = data3
         humidity = round(humidity, 2)
         temperature = round(temperature, 2)
-       
+        templateData = { 'pins' : pins }
+
+                
         print(u"Ligh Value: {:g}, Moist Value {:g}, Temperature: {:g}\u00b0C, Humidity: {:g}%".format(lighValue, moistValue, temperature, humidity))
         sensor_data['Temperature'] = temperature
         sensor_data['Humidity'] = humidity
@@ -62,6 +87,8 @@ try:
         sleep_time = next_reading-time.time()
         if sleep_time > 0:
             time.sleep(sleep_time)
+            
+            
 except KeyboardInterrupt:
     pass
 

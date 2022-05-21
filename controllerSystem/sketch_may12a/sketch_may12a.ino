@@ -21,7 +21,7 @@ void setup() {
 
   // Initialise joystick button ISR and pin
   pinMode(JOYSTICK_BUTTON, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(JOYSTICK_BUTTON), activation_ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(JOYSTICK_BUTTON), activation_ISR, LOW);
 
   // Initialise joystick error to remove joystick drift effects
   x_err = map_axis(analogRead(X_AXIS));
