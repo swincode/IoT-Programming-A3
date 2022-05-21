@@ -1,11 +1,8 @@
-
-import asyncio, time
+import asyncio
 import json
-from tb_device_mqtt import TBDeviceMqttClient
-import paho.mqtt.client as mqtt
 
 from fastapi import FastAPI, WebSocket, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
