@@ -49,7 +49,10 @@ async def control_websocket(websocket: WebSocket):
         match txt:
             case "toggle":
                 data_controller.toggle_joystick_state()
-                data_controller.send_data("joystick/state", data_controller.joystick_state)
+                data_controller.send_data("joystick/state", f"joystick {data_controller.joystick_state}")
+            case "toggle_irrigation":
+                data_controller.toggle_irrigation_state()
+                data_controller.send_data("joystick/power", f"irrigation {data_controller.irrigation_state}")
             case "up":
                 result["x"] = int(result["x"]) - 20
             case "down":

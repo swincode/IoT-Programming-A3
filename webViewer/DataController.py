@@ -3,12 +3,13 @@ class DataController:
     def __init__(self, name:str):
         self.moClient = mqtt.Client(name)
         self.moClient.connect("test.mosquitto.org")
-        self.moClient.subscribe([("joystick/command", 0), ("joystick/state", 0)])
+        self.moClient.subscribe([("joystick/command", 0), ("joystick/state", 0), ("joystick/power", 0)])
         self.moClient.on_message = self.get_msg
 
         self.x_pos = 0
         self.y_pos = 0
         self.joystick_state = True
+        self.irrigation_state = False
         self.send_data("joystick/state", self.joystick_state)
 
     
@@ -35,4 +36,7 @@ class DataController:
 
     def toggle_joystick_state(self):
         self.joystick_state = not self.joystick_state
+    
+    def toggle_irrigation_state(self):
+        self.irrigation_state = not self.irrigation_state
 

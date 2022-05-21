@@ -22,7 +22,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-sm-8">
-                        <img src="http://192.168.144.9:8081/" alt="">
+                        <img src="http://172.20.10.4:8081/" alt="">
                     </div>
                     <div class="col-sm-4">
                         <div class="data">
@@ -44,9 +44,16 @@
                 <div class="container">
                     <div class="row">
                         <div class="col">
-                            <form action="" onsubmit="sendControlCommand(event, 'toggle')">
-                                <button class="btn btn-secondary">Toggle Controller</button>
-                            </form>
+                            <div class="row">
+                                <form action="" onsubmit="sendControlCommand(event, 'toggle')">
+                                    <button class="btn btn-secondary">Toggle Controller</button>
+                                </form>
+                            </div>
+                            <div class="row">
+                                <form action="" onsubmit="sendControlCommand(event, 'toggle_irrigation')">
+                                    <button class="btn btn-secondary">Toggle Irrigation</button>
+                                </form>
+                            </div>
                         </div>
                         <div class="col">
                             <form action="" onsubmit="sendControlCommand(event, 'up')">
