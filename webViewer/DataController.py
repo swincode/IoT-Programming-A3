@@ -9,6 +9,7 @@ class DataController:
         self.x_pos = 0
         self.y_pos = 0
         self.joystick_state = True
+        self.irrigation_state = False
         self.send_data("joystick/state", self.joystick_state)
 
     
@@ -22,13 +23,19 @@ class DataController:
             self.x_pos = data[1]
             self.y_pos = data[2]
         else:
-            if data[0] == "True":
-                self.joystick_state = True
+            if data[0] == "joystick":
+                if data[1] == "True":
+                    self.joystick_state = True
+                else:
+                    self.joystick_state = False
             else:
-                self.joystick_state = False
+                if data[1] == "True":
+                    self.irrigation_state = True
+                else:
+                    self.irrigation_state = False
 
     def get_data(self) -> None:
-        return {"x":self.x_pos, "y":self.y_pos, "state":self.joystick_state}
+        return {"x":self.x_pos, "y":self.y_pos, "state":self.joystick_state, "irrigation":self.irrigation_state}
     
     def send_data(self, location: str, message: str) -> None:
         self.moClient.publish(location, str(message))
