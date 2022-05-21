@@ -10,19 +10,6 @@ from DataController import DataController
 
 app = FastAPI(host="0.0.0.0")
 
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 templates = Jinja2Templates(directory="templates")
 
 data_controller = DataController("website")
@@ -64,13 +51,13 @@ async def control_websocket(websocket: WebSocket):
                 data_controller.toggle_joystick_state()
                 data_controller.send_data("joystick/disabled", data_controller.joystick_state)
             case "up":
-                result["y"] = int(result["y"]) - 20
-            case "down":
-                result["y"] = int(result["y"]) + 20
-            case "left":
                 result["x"] = int(result["x"]) - 20
-            case "right":
+            case "down":
                 result["x"] = int(result["x"]) + 20
+            case "left":
+                result["y"] = int(result["y"]) + 20
+            case "right":
+                result["y"] = int(result["y"]) - 20
         data_controller.send_data("joystick/command", f"m {result['x']} {result['y']}")   
 
 def on_attributes_change(object, result, exception):

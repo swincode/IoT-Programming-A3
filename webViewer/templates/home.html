@@ -84,8 +84,8 @@
         ws.onmessage = function (event) {
             data = JSON.parse(event.data);
             data = JSON.parse(data);
-            document.getElementById("x-pos").innerText = "X pos = " + data.x;
-            document.getElementById("y-pos").innerText = "Y pos = " + data.y;
+            document.getElementById("x-pos").innerText = "Pan : " + data.x;
+            document.getElementById("y-pos").innerText = "Tilt : " + data.y;
         }
     </script>
 </body>
