@@ -1,10 +1,4 @@
-
-import random
-from time import sleep
 import paho.mqtt.client as mqtt
-
-flag = False
-
 class DataController:
     def __init__(self, name:str):
         self.moClient = mqtt.Client(name)
