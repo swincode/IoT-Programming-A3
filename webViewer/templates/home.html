@@ -22,14 +22,15 @@
             <div class="container">
                 <div class="row">
                     <div class="col-sm-8">
-
+                        <img src="http://172.20.10.4:8081/" alt="">
                     </div>
                     <div class="col-sm-4">
                         <div class="data">
                             <ul>
-                                <li id="control">Controller: </li>
-                                <li id="x-pos">X pos: </li>
-                                <li id="y-pos">Y pos: </li>
+                                <li id="control">Controller : </li>
+                                <li id="irrigation">Irrigation :</li>
+                                <li id="x-pos">Pan : </li>
+                                <li id="y-pos">Tilt : </li>
                             </ul>
                         </div>
                     </div>
@@ -44,9 +45,16 @@
                 <div class="container">
                     <div class="row">
                         <div class="col">
-                            <form action="" onsubmit="sendControlCommand(event, 'toggle')">
-                                <button class="btn btn-secondary">Toggle Controller</button>
-                            </form>
+                            <div class="row">
+                                <form action="" onsubmit="sendControlCommand(event, 'toggle')">
+                                    <button class="btn btn-secondary">Toggle Controller</button>
+                                </form>
+                            </div>
+                            <div class="row">
+                                <form action="" onsubmit="sendControlCommand(event, 'toggle_irrigation')">
+                                    <button class="btn btn-secondary">Toggle Irrigation</button>
+                                </form>
+                            </div>
                         </div>
                         <div class="col">
                             <form action="" onsubmit="sendControlCommand(event, 'up')">
@@ -84,8 +92,10 @@
         ws.onmessage = function (event) {
             data = JSON.parse(event.data);
             data = JSON.parse(data);
-            document.getElementById("x-pos").innerText = "X pos = " + data.x;
-            document.getElementById("y-pos").innerText = "Y pos = " + data.y;
+            document.getElementById("x-pos").innerText = "Pan : " + data.x;
+            document.getElementById("y-pos").innerText = "Tilt : " + data.y;
+            document.getElementById("control").innerText = "Controller : " + data.state
+            document.getElementById("irrigation").innerText = "Irrigation : " + data.irrigation
         }
     </script>
 </body>

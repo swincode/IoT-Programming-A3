@@ -5,6 +5,30 @@ import paho.mqtt.client as mqtt
 from tb_device_mqtt import TBDeviceMqttClient
 import json
 import serial
+import random
+from time import sleep
+  
+
+class DataController:
+    def __init__(self, name:str):
+        self.moClient = mqtt.Client(name)
+        self.moClient.connect("test.mosquitto.org")
+        self.moClient.subscribe("joystick/power")
+        self.moClient.on_message = self.get_msg
+        self.power_state = False
+    
+    def __del__(self):
+        self.moClient.loop_stop()
+        self.moClient.disconnect()
+
+    def get_msg(self, client, userdata, message: str) -> None:
+        data = message.payload.decode("utf-8")
+        self.power_state = data
+        print(self.power_state)
+
+    def get_data(self) -> None:
+        return {"state":self.power_state}
+
 device='/dev/ttyS0'
 
 arduino= serial.Serial(device,9600)
@@ -19,10 +43,6 @@ ACCESS_TOKEN = 'Irrigation_System_Token'
 INTERVAL=2
 
 sensor_data = {'temperature': 0, 'humidity': 0}
-pins = {
-    3 : {'name' : 'Pump', 'state' : 0 },
-    2 : {'name' : 'LED', 'state' : 0 }
-    }
 
 next_reading = time.time() 
 
@@ -36,24 +56,10 @@ client.connect(THINGSBOARD_HOST, 1883, 60)
 
 client.loop_start()
 
-        
-def toggle_function(changePin, toggle):
-        changePin = int(changePin)
-        deviceName = pins[changePin]['name']
-        if toggle == "on": 
-         if changePin == 3:
-            ser.write(b"3")
-            pins[changePin]['state'] = 1
-            message = "Turned" + deviceName + "on."
-              
-        if toggle == "off":
-          if changePin == 3:
-            ser.write(b"4")
-            pins[changePin]['state'] = 0
-            #Set the pin low
-            message = "Turned" + deviceName + "off."    
-
+ 
 try:
+    data_controller = DataController("irrigation")
+    data_controller.moClient.loop_start()
     while True:
         data= arduino.readline()
         data1= arduino.readline()
@@ -70,15 +76,27 @@ try:
         temperature = data3
         humidity = round(humidity, 2)
         temperature = round(temperature, 2)
-        templateData = { 'pins' : pins }
+        
 
-                
+        changePin = data_controller.get_data()
+
+        if changePin == {'state': True}:
+            arduino.write(b"3")
+            message = "Pump Turned" + "on."
+            print(changePin)
+        if changePin == {'state': False}:
+            arduino.write(b"4")
+            message = "Pump Turned" +"off."
+            
+        print(changePin)   
+
+     
         print(u"Ligh Value: {:g}, Moist Value {:g}, Temperature: {:g}\u00b0C, Humidity: {:g}%".format(lighValue, moistValue, temperature, humidity))
         sensor_data['Temperature'] = temperature
         sensor_data['Humidity'] = humidity
         sensor_data['Ligh Value'] = lighValue
         sensor_data['Moist Value'] = moistValue
-
+        
 
         # Sending humidity and temperature data to ThingsBoard
         client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)

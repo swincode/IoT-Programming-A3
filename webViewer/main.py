@@ -4,24 +4,10 @@ import json
 from fastapi import FastAPI, WebSocket, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
 
 from DataController import DataController
 
-app = FastAPI()
-
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(host="0.0.0.0")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -42,6 +28,7 @@ async def websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
         await asyncio.sleep(0.5)
+        
         # Get mqtt to receive data
         data = data_controller.get_data()
         # print(data)
@@ -62,15 +49,18 @@ async def control_websocket(websocket: WebSocket):
         match txt:
             case "toggle":
                 data_controller.toggle_joystick_state()
-                data_controller.send_data("joystick/disabled", data_controller.joystick_state)
+                data_controller.send_data("joystick/state", f"joystick {data_controller.joystick_state}")
+            case "toggle_irrigation":
+                data_controller.toggle_irrigation_state()
+                data_controller.send_data("joystick/power", f"irrigation {data_controller.irrigation_state}")
             case "up":
-                result["y"] = int(result["y"]) - 20
-            case "down":
-                result["y"] = int(result["y"]) + 20
-            case "left":
                 result["x"] = int(result["x"]) - 20
-            case "right":
+            case "down":
                 result["x"] = int(result["x"]) + 20
+            case "left":
+                result["y"] = int(result["y"]) + 20
+            case "right":
+                result["y"] = int(result["y"]) - 20
         data_controller.send_data("joystick/command", f"m {result['x']} {result['y']}")   
 
 def on_attributes_change(object, result, exception):
