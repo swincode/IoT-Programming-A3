@@ -15,8 +15,8 @@ float temp;
 
 
 //water level sensor var
-int waterLSensorPin= A1;
-int waterLValue= 0;
+int moistSensorPin= A1;
+int moistValue= 0;
 
 //lEDs pins
 int lEDsPin =2;
@@ -34,7 +34,7 @@ int power =9;
  
 void setup() {
  HT.begin();
- pinMode(waterLSensorPin,INPUT);
+ pinMode(moistSensorPin,INPUT);
  pinMode(photoRpin,INPUT);
  pinMode(lEDsPin, OUTPUT);
  pinMode(dcMotorIn1, INPUT);
@@ -99,18 +99,18 @@ else{
  }
 
 // water level 
-waterLValue = analogRead(waterLSensorPin);
- Serial.println(waterLValue);
+moistValue = analogRead(moistSensorPin);
+ Serial.println(moistValue);
 delay(500);
 // water pump
   if(pumpisAutomated==true){
-if(waterLValue < 100)
+if(moistValue < 100)
 {
    digitalWrite(dcMotorIn1,HIGH);
    digitalWrite(dcMotorIn2,LOW);
 }
 
-else if(waterLValue >= 200)
+else if(moistValue>= 200)
 {
    digitalWrite(dcMotorIn1,LOW);
    digitalWrite(dcMotorIn2,LOW);
