@@ -24,6 +24,7 @@ class DataController:
     def get_msg(self, client, userdata, message: str) -> None:
         data = message.payload.decode("utf-8")
         self.power_state = data
+        print(self.power_state)
 
     def get_data(self) -> None:
         return {"state":self.power_state}
@@ -57,6 +58,8 @@ client.loop_start()
 
  
 try:
+    data_controller = DataController("irrigation")
+    data_controller.moClient.loop_start()
     while True:
         data= arduino.readline()
         data1= arduino.readline()
@@ -73,8 +76,7 @@ try:
         temperature = data3
         humidity = round(humidity, 2)
         temperature = round(temperature, 2)
-        data_controller = DataController("irrigation")
-        data_controller.moClient.loop_start()
+        
 
         changePin = data_controller.get_data()
 
