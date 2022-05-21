@@ -46,7 +46,7 @@ void loop() {
   // Assign current values to previous
   prev_x_val = x_val;
   prev_y_val = y_val;
-  delay(250);
+  delay(1000);
   
 }
 
@@ -55,12 +55,12 @@ bool outside_range(int prev_val, int val, int err) {
 }
 
 int map_axis(int axis) {
-  return map(axis, 0, 1023, -256, 256);
+  return map(axis, 0, 1023, 0, 180);
 }
 
 void activation_ISR() {
-  Serial.println("HERE");
   if ((millis() - last_debounce_time) > DEBOUNCE_DELAY) {
+    Serial.println("toggle power");
     activation_state = !activation_state;
     last_debounce_time = millis();
     digitalWrite(LED_PIN, activation_state);

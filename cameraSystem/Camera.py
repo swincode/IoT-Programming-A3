@@ -1,23 +1,23 @@
 import RPi.GPIO as GPIO
-#import asyncio
 from time import sleep
 
-from tb_device_mqtt import TBDeviceMqttClient #, TBPublishInfo
+from tb_device_mqtt import TBDeviceMqttClient
+import paho.mqtt.client as mqtt
 
 POSITION_ZERO = [60, 90]
 
 class Camera():
     def __init__(self):
-        # Store prvious command
-        self.previousCommand = []
-
         # Set up MQTT Connection
-        self.client = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
+        self.tbClient = TBDeviceMqttClient("demo.thingsboard.io", "qSPi2bDBvBJaPJwcFrTX")
+        self.moClient = mqtt.Client("gimbal")
         
-        # Connect to ThingsBoard
-        self.client.connect()
-        self.client.send_telemetry({"currentFirmwareVersion": 0.1})
-        #self.client.subscribe_to_attribute("command", self.parseCommand)
+        # Connect to MQTT
+        self.tbClient.connect()
+        self.moClient.connect("test.mosquitto.org")
+        self.tbClient.send_telemetry({"currentFirmwareVersion": 0.1})
+        self.moClient.subscribe("joystick/command")
+        self.moClient.on_message = self.parseCommand
 
         # Reference GPIO pins with Broadcom SOC channel numbers
         GPIO.setmode(GPIO.BCM)
@@ -34,102 +34,76 @@ class Camera():
 
         # Turn to face the user
         self.turn(POSITION_ZERO)
-        # asyncio.run(self.turn(POSITION_ZERO))
-
-        # Keep the Motors Quite
-        #self.sleepMotors()
 
     # Destructor
     def __del__(self):
         # Turn to face the user
         self.turn(POSITION_ZERO)
-        # asyncio.run(self.turn(POSITION_ZERO))
 
         # Stop servos
         self.tiltServo.stop()
         self.panServo.stop()
 
         # Disconnect from MQTT
-        self.client.disconnect()
+        self.tbClient.disconnect()
+        self.moClient.loop_stop()
 
         # Free GPIO
         GPIO.cleanup()
 
-    def cameraGibleLoop(self):
+    def cameraGimbleLoop(self):
+        # As we can't subscribe to MQTT notifications with our version of ThingsBoard, we use mosquitto as a subscribable MQTT broker.
+        self.moClient.loop_start()
+
         while True:
-            # Keep the Python script alive, as MQTT client is threaded, this thread can be busy doing things. We will use it to send camera feed
+            # This loop keeps the Python script alive 
+            sleep(100)
 
-            # If not moving and have actions to complete
-            #sleep(100)
-            self.client.request_attributes(["command"], callback=self.parseCommand)
-            sleep(0.05)
-            #if self.actionQueue:
-                #command = self.actionQueue.popleft()
-                #command()
-                
-
-            # sleep(100)
-
-    def parseCommand(self, client: TBDeviceMqttClient, content: dict[str, dict[str, str]], message: str):
-        #print(client, content, message)
-        
+    def parseCommand(self, client, userdata: dict[str, str], message: str):
         # Get command from message and split by space
         # If Command is Move, the command will have the format
             # [M, tiltValue, panValue]
         # If Command is Wait, the command will have the format
             # [W, waitTime]
-        
-        # If new command
-        if content.get('client').get("command") != self.previousCommand:
-            self.previousCommand = content.get('client').get("command")
-
-            command = content.get('client').get("command").split(' ')
-            print('Got command')
+            
+        try:
+            command = message.payload.decode("utf-8").split(' ')
             
             if command[0] == 'm':
                 if len(command) == 3:
                     try:
                         angle = list(map(float, command[1:3]))
                     except ValueError:
-                        raise ValueError("Angle to move is not two floats or ints seperated by a comman\nm,63.1,90.2")
+                        raise ValueError("Angle to move is not two floats or ints seperated by a comma")
                     
                     self.turn(angle)
-                    #self.actionQueue.append(lambda: self.turn(angle))
-                    #await self.turn(angle)
                 else:
-                    raise ValueError("Angle to move is not two floats or ints seperated by a comma\nnm,63.1,90.2")
+                    raise ValueError("Angle to move is not two floats or ints seperated by a comma")
             elif command[0] == 'w':
                 if len(command) == 2:
                     try:
                         waitTime = float(command[1])
                     except ValueError:
-                        raise ValueError("Wait time is not a float or int\nw,10.1")
+                        raise ValueError("Wait time is not a float or int")
                     
-                    self.actionQueue.append(lambda: self.wait(waitTime))
-                    #await self.wait(waitTime)
+                    self.wait(waitTime)
                 else:
-                    raise ValueError("Wait time is not a float or int\nw,10.1")
+                    raise ValueError("Wait time is not a float or int")
             else:
-                raise ValueError("Unknown command: Please use either m; move, or w; wait.\nm,63.1,90.2")
+                raise ValueError("Unknown command: Please use either m; move, or w; wait.")
+        except AttributeError:
+            print("Dropped a message")
+            sleep(1) 
 
     def turn(self, angle: list[float]):
-        # Don't allow new gimbal actions to be carried out while we move it
-        #self.moveStatus = True
-
         self.tiltServo.ChangeDutyCycle(2+(angle[0]/18))
         self.panServo.ChangeDutyCycle(2+(angle[1]/18))
 
-        result = self.client.send_telemetry({"pan": angle[0], "tilt": angle[1]})
-        #success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
+        result = self.tbClient.send_telemetry({"pan": angle[0], "tilt": angle[1]})
 
-        # Allow the servo to move to position
-        #sleep(0.4)
-
-        # Put the servos to sleep such that the gimbal doesn't try to maintain position
-        # If the gimbal is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
-        #self.sleepMotors()
-        
-        #self.moveStatus = False
+        # Put the servos to sleep such that the gimble doesn't try to maintain position
+        # If the gimble is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
+        self.sleepMotors()
 
     def sleepMotors(self):
         # Stop servos
@@ -139,8 +113,7 @@ class Camera():
     def wait(self, waitTime: float): 
         self.sleepMotors()
         sleep(waitTime)
-        #await asyncio.sleep(waitTime)
     
 if __name__ == "__main__":
     camera = Camera()
-    #camera.cameraGibleLoop()
+    camera.cameraGimbleLoop()
