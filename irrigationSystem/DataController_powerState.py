@@ -22,10 +22,5 @@ class DataController:
 
     def get_data(self) -> None:
         return {"state":self.power_state}
-    
-    def send_data(self, message: str) -> None:
-        self.moClient.publish("joystick/power", message)
-
-data_controller = DataController("irrigation")
-data_controller.moClient.loop_start()
-       
+        print get_data()
+   
