@@ -86,6 +86,7 @@
             data = JSON.parse(data);
             document.getElementById("x-pos").innerText = "Pan : " + data.x;
             document.getElementById("y-pos").innerText = "Tilt : " + data.y;
+            document.getElementById("control").innerText = "Controller : " + data.state
         }
     </script>
 </body>

@@ -28,6 +28,7 @@ async def websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
         await asyncio.sleep(0.5)
+        
         # Get mqtt to receive data
         data = data_controller.get_data()
         # print(data)

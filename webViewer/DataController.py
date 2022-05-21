@@ -3,7 +3,7 @@ class DataController:
     def __init__(self, name:str):
         self.moClient = mqtt.Client(name)
         self.moClient.connect("test.mosquitto.org")
-        self.moClient.subscribe("joystick/command")
+        self.moClient.subscribe([("joystick/command", 0), ("joystick/state", 0)])
         self.moClient.on_message = self.get_msg
 
         self.x_pos = 0
@@ -18,11 +18,17 @@ class DataController:
 
     def get_msg(self, client, userdata, message: str) -> None:
         data = message.payload.decode("utf-8").split(" ")
-        self.x_pos = data[1]
-        self.y_pos = data[2]
+        if len(data) == 3:
+            self.x_pos = data[1]
+            self.y_pos = data[2]
+        else:
+            if data[0] == "True":
+                self.joystick_state = True
+            else:
+                self.joystick_state = False
 
     def get_data(self) -> None:
-        return {"x":self.x_pos, "y":self.y_pos}
+        return {"x":self.x_pos, "y":self.y_pos, "state":self.joystick_state}
     
     def send_data(self, location: str, message: str) -> None:
         self.moClient.publish(location, str(message))
