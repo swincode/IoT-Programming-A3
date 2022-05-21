@@ -28,14 +28,7 @@ app.add_middleware(
 
 templates = Jinja2Templates(directory="templates")
 
-#client = TBDeviceMqttClient("localhost", "bLvC1TSknBYefPXQFOSX")
-client = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
-
-# client = TBDeviceMqttClient("demo.thingsboard.io", "bLvC1TSknBYefPXQFOSX")
-client.connect()
-# something = ""
-
-data_controller = DataController("joystick")
+data_controller = DataController("website")
 
 @app.on_event("startup")
 async def startup():
