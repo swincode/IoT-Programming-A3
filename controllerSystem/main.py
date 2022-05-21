@@ -6,7 +6,7 @@ from tb_device_mqtt import TBDeviceMqttClient
 
 ser = serial.Serial("/dev/ttyACM0", 9600)
 disabled = False
-state = True
+
 
 tbClient = TBDeviceMqttClient("demo.thingsboard.io", "NmhyyW2DzT0Zb7C41PvS")
 moClient = mqtt.Client("joystick")
@@ -21,18 +21,20 @@ def disabled_state():
 moClient.on_message = disabled_state
 
 def main():
+    state = True
     while True:
         if not disabled:
             data = parse_serial_input()
             if data == "toggle power":
                 state = not state
                 tbClient.send_attributes({"power state": state})
+                moClient.publish("joystick/power", state)
             data_arr = data.split(",")
             if len(data_arr) == 2:
                 data_arr[0] = int(data_arr[0]) - 30
-                if data_arr[0] < 0:
+                if int(data_arr[0]) < 0:
                     data_arr[0] = 0
-                if data_arr[1] < 0:
+                if int(data_arr[1]) < 0:
                     data_arr[1] = 0
                 mqtt_string = f"m {data_arr[0]} {data_arr[1]}"
                 moClient.publish("joystick/command", mqtt_string)
