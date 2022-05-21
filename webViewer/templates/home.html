@@ -27,9 +27,10 @@
                     <div class="col-sm-4">
                         <div class="data">
                             <ul>
-                                <li id="control">Controller: </li>
-                                <li id="x-pos">X pos: </li>
-                                <li id="y-pos">Y pos: </li>
+                                <li id="control">Controller : </li>
+                                <li id="irrigation">Irrigation :</li>
+                                <li id="x-pos">Pan : </li>
+                                <li id="y-pos">Tilt : </li>
                             </ul>
                         </div>
                     </div>
@@ -94,6 +95,7 @@
             document.getElementById("x-pos").innerText = "Pan : " + data.x;
             document.getElementById("y-pos").innerText = "Tilt : " + data.y;
             document.getElementById("control").innerText = "Controller : " + data.state
+            document.getElementById("irrigation").innerText = "Irrigation : " + data.irrigation
         }
     </script>
 </body>
