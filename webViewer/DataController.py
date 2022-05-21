@@ -1,10 +1,4 @@
-
-import random
-from time import sleep
 import paho.mqtt.client as mqtt
-
-flag = False
-
 class DataController:
     def __init__(self, name:str):
         self.moClient = mqtt.Client(name)
@@ -29,16 +23,3 @@ class DataController:
     
     def send_data(self, message: str) -> None:
         self.moClient.publish("joystick/command", message)
-
-try:
-    if flag:
-        cli = mqtt.Client("joystick")
-        cli.connect("test.mosquitto.org")
-        data_controller = DataController()
-        data_controller.moClient.loop_start()
-        while True:
-            sleep(1)
-            print("sending")
-            cli.publish("joystick/command", f"m {random.randint(0, 180)} {random.randint(0, 180)}")
-except KeyboardInterrupt:
-    pass
