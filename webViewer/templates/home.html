@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,36 +12,16 @@
         <title>IoT Programming A3</title>
     </head>
 
-<body style="padding: 10%;">
-    <center>
-        <h1 style="font-family: Comic Sans;">IoT Programming Assignment 3 dashboard</h1>
-    </center>
-    <div style="padding: 20%; padding-top: 5%">
-        <div class="camera">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-8">
-
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="data">
-                            <ul>
-                                <li id="control">Controller: </li>
-                                <li id="x-pos">X pos: </li>
-                                <li id="y-pos">Y pos: </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="controls">
-            <center>
+    <body style="padding: 10%;">
+        <center>
+            <h1 style="font-family: Comic Sans;">IoT Programming Assignment 3 dashboard</h1>
+        </center>
+        <div style="padding: 20%; padding-top: 5%">
+            <div class="camera">
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-8">
-                            
+
                         </div>
                         <div class="col-sm-4">
                             <div class="data">
@@ -56,69 +35,77 @@
                     </div>
                 </div>
             </div>
-
             <hr>
-
             <div class="controls">
                 <center>
                     <div class="container">
                         <div class="row">
-                            <div class="col">
-                                <form action="" onsubmit="sendControlCommand(event, 'toggle')">
-                                    <button class="btn btn-secondary">Toggle Controller</button>
-                                </form>
+                            <div class="col-sm-8">
+                                
                             </div>
-                            <div class="col">
-                                <form action="" onsubmit="sendControlCommand(event, 'up')">
-                                    <button class="btn btn-primary">Up</button>
-                                </form>
-                            </div>
-                            <div class="col">
-                                <form action="" onsubmit="sendControlCommand(event, 'down')">
-                                    <button class="btn btn-primary">Down</button>
-                                </form>
-                            </div>
-                            <div class="col">
-                                <form action="" onsubmit="sendControlCommand(event, 'left')">
-                                    <button class="btn btn-primary">Left</button>
-                                </form>
-                            </div>
-                            <div class="col">
-                                <form action="" onsubmit="sendControlCommand(event, 'right')">
-                                    <button class="btn btn-primary">Right</button>
-                                </form>
+                            <div class="col-sm-4">
+                                <div class="data">
+                                    <ul>
+                                        <li id="control">Controller: </li>
+                                        <li id="x-pos">X pos: </li>
+                                        <li id="y-pos">Y pos: </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </center>
+                </div>
+
+                <hr>
+
+                <div class="controls">
+                    <center>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <form action="" onsubmit="sendControlCommand(event, 'toggle')">
+                                        <button class="btn btn-secondary">Toggle Controller</button>
+                                    </form>
+                                </div>
+                                <div class="col">
+                                    <form action="" onsubmit="sendControlCommand(event, 'up')">
+                                        <button class="btn btn-primary">Up</button>
+                                    </form>
+                                </div>
+                                <div class="col">
+                                    <form action="" onsubmit="sendControlCommand(event, 'down')">
+                                        <button class="btn btn-primary">Down</button>
+                                    </form>
+                                </div>
+                                <div class="col">
+                                    <form action="" onsubmit="sendControlCommand(event, 'left')">
+                                        <button class="btn btn-primary">Left</button>
+                                    </form>
+                                </div>
+                                <div class="col">
+                                    <form action="" onsubmit="sendControlCommand(event, 'right')">
+                                        <button class="btn btn-primary">Right</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </center>
+                </div>
             </div>
         </div>
+        <script>
+            var button_ws = new WebSocket("ws://localhost:8000/ws/position");
+            function sendControlCommand(event, msg) {
+                button_ws.send(msg);
+                event.preventDefault();
+            }
 
-    </div>
-    <script>
-        var button_ws = new WebSocket("ws://localhost:8000/ws/position");
-        function sendControlCommand(event, msg) {
-            button_ws.send(msg);
-            event.preventDefault();
-        }
-    </script>
-    <script>
-        var ws = new WebSocket("ws://localhost:8000/ws/data");
-        ws.onmessage = function (event) {
-            data = JSON.parse(event.data);
-            data = JSON.parse(data);
-            document.getElementById("x-pos").innerText = "X pos = " + data.x;
-            document.getElementById("y-pos").innerText = "Y pos = " + data.y;
-        }
-    </script>
-</body>
-
-            var ws = new WebSocket("ws://localhost:8000/ws/controller");
+            var ws = new WebSocket("ws://localhost:8000/ws/data");
             ws.onmessage = function (event) {
-                data = JSON.parse(event.data)
-                data = JSON.parse(data)
-                document.getElementById("x-pos").innerText = "X pos = " + data.x
-                document.getElementById("y-pos").innerText = "Y pos = " + data.y
+                data = JSON.parse(event.data);
+                data = JSON.parse(data);
+                document.getElementById("x-pos").innerText = "X pos = " + data.x;
+                document.getElementById("y-pos").innerText = "Y pos = " + data.y;
             }
         </script>
     </body>
