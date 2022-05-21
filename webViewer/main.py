@@ -60,21 +60,21 @@ async def websocket(websocket: WebSocket):
 async def control_websocket(websocket: WebSocket):
     await websocket.accept()
     while True:
-        print("here")
         txt = await websocket.receive_text()
-        # result = data_controller.get_data()
-        # match txt:
-        #     case "toggle":
-        #         client.send_attributes({"controller state" : not (result.get("client").get("controller state"))})
-        #     case "up":
-        #         result.y = result.y - 20
-        #     case "down":
-        #         result.y = result.y + 20
-        #     case "left":
-        #         result.x = result.x - 20
-        #     case "right":
-        #         result.x = result.x + 20
-        # data_controller.send_data(f"m {result.x} {result.y}")   
+        result = data_controller.get_data()
+        match txt:
+            case "toggle":
+                data_controller.toggle_joystick_state()
+                data_controller.send_data("joystick/disabled", data_controller.joystick_state)
+            case "up":
+                result["y"] = int(result["y"]) - 20
+            case "down":
+                result["y"] = int(result["y"]) + 20
+            case "left":
+                result["x"] = int(result["x"]) - 20
+            case "right":
+                result["x"] = int(result["x"]) + 20
+        data_controller.send_data("joystick/command", f"m {result['x']} {result['y']}")   
 
 def on_attributes_change(object, result, exception):
     if exception is not None:

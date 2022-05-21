@@ -14,6 +14,9 @@ class DataController:
 
         self.x_pos = 0
         self.y_pos = 0
+        self.joystick_state = True
+        self.send_data("joystick/enable", self.joystick_state)
+
     
     def __del__(self):
         self.moClient.loop_stop()
@@ -27,8 +30,11 @@ class DataController:
     def get_data(self) -> None:
         return {"x":self.x_pos, "y":self.y_pos}
     
-    def send_data(self, message: str) -> None:
-        self.moClient.publish("joystick/command", message)
+    def send_data(self, location: str, message: str) -> None:
+        self.moClient.publish(location, str(message))
+
+    def toggle_joystick_state(self):
+        self.joystick_state = not self.joystick_state
 
 try:
     if flag:

@@ -14,8 +14,9 @@ tbClient.connect()
 moClient.connect("test.mosquitto.org")
 moClient.subscribe("joystick/disabled")
 
-def disabled_state():
-    disabled = not disabled
+def disabled_state(client, userdata, message):
+    print("here")
+    disabled = bool(message.payload.decode("utf-8"))
     tbClient.send_attributes({"enabled" : disabled})
 
 moClient.on_message = disabled_state
