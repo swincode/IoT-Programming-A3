@@ -9,7 +9,7 @@ class DataController:
         self.x_pos = 0
         self.y_pos = 0
         self.joystick_state = True
-        self.send_data("joystick/enable", self.joystick_state)
+        self.send_data("joystick/state", self.joystick_state)
 
     
     def __del__(self):

@@ -4,7 +4,6 @@ import json
 from fastapi import FastAPI, WebSocket, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
 
 from DataController import DataController
 
@@ -49,7 +48,7 @@ async def control_websocket(websocket: WebSocket):
         match txt:
             case "toggle":
                 data_controller.toggle_joystick_state()
-                data_controller.send_data("joystick/disabled", data_controller.joystick_state)
+                data_controller.send_data("joystick/state", data_controller.joystick_state)
             case "up":
                 result["x"] = int(result["x"]) - 20
             case "down":
