@@ -22,7 +22,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-sm-8">
-                        
+
                     </div>
                     <div class="col-sm-4">
                         <div class="data">
@@ -73,20 +73,19 @@
 
     </div>
     <script>
-        var ws = new WebSocket("ws://localhost:8000/ws");
+        var button_ws = new WebSocket("ws://localhost:8000/ws/position");
         function sendControlCommand(event, msg) {
-            console.log(msg);
-            ws.send(msg)
-            event.preventDefault()
+            button_ws.send(msg);
+            event.preventDefault();
         }
     </script>
     <script>
-        var ws = new WebSocket("ws://localhost:8000/ws/controller");
+        var ws = new WebSocket("ws://localhost:8000/ws/data");
         ws.onmessage = function (event) {
-            data = JSON.parse(event.data)
-            data = JSON.parse(data)
-            document.getElementById("x-pos").innerText = "X pos = " + data.x
-            document.getElementById("y-pos").innerText = "Y pos = " + data.y
+            data = JSON.parse(event.data);
+            data = JSON.parse(data);
+            document.getElementById("x-pos").innerText = "X pos = " + data.x;
+            document.getElementById("y-pos").innerText = "Y pos = " + data.y;
         }
     </script>
 </body>
