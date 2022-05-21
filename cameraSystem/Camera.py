@@ -96,10 +96,14 @@ class Camera():
             sleep(1) 
 
     def turn(self, angle: list[float]):
+        print(angle)
         self.tiltServo.ChangeDutyCycle(2+(angle[0]/18))
         self.panServo.ChangeDutyCycle(2+(angle[1]/18))
 
         result = self.tbClient.send_telemetry({"pan": angle[0], "tilt": angle[1]})
+
+        # Allow Gimble to reposition
+        sleep(0.4)
 
         # Put the servos to sleep such that the gimble doesn't try to maintain position
         # If the gimble is told to maintain position it constantly moves due to the digital PWM wave outputted by the RPi, and the low quality of the servos being used
