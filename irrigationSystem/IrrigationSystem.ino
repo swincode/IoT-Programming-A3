@@ -72,8 +72,8 @@ void loop() {
       
        else if (value == '4')
       {
-      digitalWrite(dcMotorIn1,LOW);
-      digitalWrite(dcMotorIn2,LOW);
+      //digitalWrite(dcMotorIn1,LOW);
+      //digitalWrite(dcMotorIn2,LOW);
        pumpisAutomated =true;
       }
    }
@@ -104,15 +104,9 @@ moistValue = analogRead(moistSensorPin);
 delay(500);
 // water pump
   if(pumpisAutomated==true){
-if(moistValue < 100)
+if(moistValue > 500)
 {
    digitalWrite(dcMotorIn1,HIGH);
-   digitalWrite(dcMotorIn2,LOW);
-}
-
-else if(moistValue>= 200)
-{
-   digitalWrite(dcMotorIn1,LOW);
    digitalWrite(dcMotorIn2,LOW);
 }
 else{
