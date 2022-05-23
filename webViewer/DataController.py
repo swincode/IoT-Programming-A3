@@ -36,7 +36,9 @@ class DataController:
                     self.irrigation_state = False
 
     def get_data(self) -> None:
-        return {"x":self.x_pos, "y":self.y_pos, "state":self.joystick_state, "irrigation":self.irrigation_state}
+        if self.irrigation_state:
+            return {"x":self.x_pos, "y":self.y_pos, "state":self.joystick_state, "irrigation":self.irrigation_state}
+        return {"x":self.x_pos, "y":self.y_pos, "state":self.joystick_state, "irrigation":"automated"}
     
     def send_data(self, location: str, message: str) -> None:
         self.moClient.publish(location, str(message))
