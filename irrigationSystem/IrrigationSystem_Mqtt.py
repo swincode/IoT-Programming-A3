@@ -15,19 +15,20 @@ class DataController:
         self.moClient.connect("test.mosquitto.org")
         self.moClient.subscribe("joystick/power")
         self.moClient.on_message = self.get_msg
-        self.power_state = False
+        self.power_state = "False"
     
     def __del__(self):
         self.moClient.loop_stop()
         self.moClient.disconnect()
 
     def get_msg(self, client, userdata, message: str) -> None:
-        data = message.payload.decode("utf-8")
-        self.power_state = data
-        print(self.power_state)
+        data = message.payload.decode("utf-8").split(' ')
+        if len(data) == 2 and data[0] == "irrigation":
+            self.power_state = data[1]
+            print(self.power_state)
 
     def get_data(self) -> None:
-        return {"state":self.power_state}
+        return self.power_state
 
 device='/dev/ttyS0'
 
@@ -75,28 +76,24 @@ try:
         humidity= data2
         temperature = data3
         humidity = round(humidity, 2)
-        temperature = round(temperature, 2)
-        
+        temperature = round(temperature, 2)        
 
         changePin = data_controller.get_data()
-
-        if changePin == {'state': True}:
+        print(changePin, type(changePin))
+        if changePin == "True":
             arduino.write(b"3")
             message = "Pump Turned" + "on."
-            print(changePin)
-        if changePin == {'state': False}:
+        else:
             arduino.write(b"4")
             message = "Pump Turned" +"off."
+        print(message)
             
-        print(changePin)   
-
-     
+    
         print(u"Ligh Value: {:g}, Moist Value {:g}, Temperature: {:g}\u00b0C, Humidity: {:g}%".format(lighValue, moistValue, temperature, humidity))
         sensor_data['Temperature'] = temperature
         sensor_data['Humidity'] = humidity
         sensor_data['Ligh Value'] = lighValue
-        sensor_data['Moist Value'] = moistValue
-        
+        sensor_data['Moist Value'] = moistValue      
 
         # Sending humidity and temperature data to ThingsBoard
         client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
