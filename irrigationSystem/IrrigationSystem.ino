@@ -84,7 +84,7 @@ lightValue = analogRead(photoRpin);
  delay(500);
  
  if(LEDisAutomated==true){
-if(lightValue < 350)
+if(lightValue < 450)
 {
   digitalWrite(lEDsPin,HIGH);
 }
